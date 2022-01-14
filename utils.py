@@ -7,6 +7,20 @@ from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader, Dataset
 
+class PairDataset(Dataset):
+
+    def __init__(self, x, y):
+        super(PairDataset, self).__init__()
+        self.x = torch.Tensor(x)
+        self.y = torch.Tensor(y)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        sample = {"X": self.x[idx], "Y": self.y[idx]}
+        return sample
+
 class DataModule():
 
     def __init__(self, data_dir, resize=(60, 60), max_data=None, n_test_simulation=12, batch_size=50,
@@ -28,6 +42,9 @@ class DataModule():
         self.names, self.data_arrays = self.load_data()
         self.n_train = int((1 - self.test_ratio) * len(self.data_arrays))
 
+        # Split training and test data
+        self.arrays_train = self.data_arrays[:self.n_train]
+        self.arrays_test = self.data_arrays[self.n_train:]
 
     def load_data(self):
 
