@@ -46,6 +46,24 @@ class DataModule():
         self.arrays_train = self.data_arrays[:self.n_train]
         self.arrays_test = self.data_arrays[self.n_train:]
 
+        self.x_train, self.y_train = self.prepare_x_y(self.arrays_train,
+                                                        skip_steps = self.skip_steps,
+                                                        store_steps_ahead = self.store_steps_ahead)
+
+        self.train_dataset = PairDataset(self.x_train, self.y_train)
+
+
+        self.x_test, self.y_test = self.prepare_x_y(self.arrays_test,
+                                                        skip_steps = self.skip_steps,
+                                                        store_steps_ahead = self.store_steps_ahead)
+
+        self.test_dataset = PairDataset(self.x_test, self.y_test)
+        self.test_simulations = self.select_test_simulations(self.arrays_test)
+
+        self.train_dataloader = DataLoader(self.train_dataset, batch_size = self._batch_size, shuffle = True)
+        self.val_dataloader = DataLoader(self.test_dataset, batch_size = self._batch_size, shuffle = True)
+
+
     def load_data(self):
 
         data_files = [name for name in os.listdir(self.data_dir) if "array" in name]
@@ -89,3 +107,20 @@ class DataModule():
         Y = np.array(Y)
 
         return X, Y
+
+    def _select_test_simulations(self, arrays_test):
+
+        if len(arrays_test) < self._n_test_simulation:
+            n_test_simulation = len(arrays_test)
+        else:
+            n_test_simulation = self.n_test_simulation
+
+        test_simulations = [arrays_test[index][8:] for index in np.arange(0, n_test_simulation, 1)]
+
+        extra_sims = [arrays_test[0],
+                      arrays_test[1][5:],
+                      arrays_test[2][15:]] #different u0s
+
+        test_simulations.extend(extra_sims)
+
+        return test_simulations
