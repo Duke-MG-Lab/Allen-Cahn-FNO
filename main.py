@@ -39,6 +39,7 @@ def train(input_config, output_config, model_config):
         train_l2_step = 0
         train_l2_full = 0
 
+        # Training
         for index, batch in enumerate(data_module.train_dataloader):
 
             Xb, Ystep1, Ystep2, Ystep3, Ystep4 = batch["X"],batch["Y"][:,0,:,:,:],batch["Y"][:,1,:,:,:],batch["Y"][:,2,:,:,:],batch["Y"][:,3,:,:,:]
@@ -59,8 +60,26 @@ def train(input_config, output_config, model_config):
                 losses.append(l1_loss(Ypred, Ydata[i]))
 
             losses = [l.view(1) for l in losses]
-            loss = torch.mean( torch.cat(losses, 0) )
+            loss = torch.mean(torch.cat(losses, 0))
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+        scheduler.step()
+
+        # Validation
+        with torch.no_grad():
+
+            for index, batch in enumerate(data_module.test_dataloader):
+
+                Xb, Ystep1, Ystep2, Ystep3, Ystep4 = batch["X"],batch["Y"][:,0,:,:,:],batch["Y"][:,1,:,:,:],batch["Y"][:,2,:,:,:],batch["Y"][:,2,:,:,:]
+                Ypred1 = model(Xb)
+                Ypred2 = model(Ypred1)
+                Ypred3 = model(Ypred2)
+                Ypred4 = model(Ypred3)
+
+                val_loss1 = l1_loss(Ypred1, Ystep1)
+                val_loss2 = l1_loss(Ypred2, Ystep2)
+                val_loss3 = l1_loss(Ypred3, Ystep3)
+                val_loss4 = l1_loss(Ypred4, Ystep4)
