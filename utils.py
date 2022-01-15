@@ -108,7 +108,7 @@ class DataModule():
 
         return X, Y
 
-    def _select_test_simulations(self, arrays_test):
+    def select_test_simulations(self, arrays_test):
 
         if len(arrays_test) < self._n_test_simulation:
             n_test_simulation = len(arrays_test)

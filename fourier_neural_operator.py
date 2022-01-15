@@ -92,6 +92,7 @@ class Fourier_Net2D(nn.Module):
         self.fc2 = nn.Linear(128, 1)
 
     def forward(self, x):
+        
         grid = self.get_grid(x.shape, x.device)
         x = torch.cat((x, grid), dim=-1)
         x = self.fc0(x)
@@ -122,7 +123,7 @@ class Fourier_Net2D(nn.Module):
         x = self.fc1(x)
         x = F.gelu(x)
         x = self.fc2(x)
-        
+
         return x
 
     def get_grid(self, shape, device):
