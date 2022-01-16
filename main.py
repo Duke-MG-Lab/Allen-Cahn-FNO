@@ -105,7 +105,7 @@ def train(input_config, output_config, model_config):
         # Validation
         with torch.no_grad():
 
-            for i, batch in enumerate(data_module.test_dataloader):
+            for i, batch in enumerate(data_module.val_dataloader):
 
                 Xb, Ystep1, Ystep2, Ystep3, Ystep4 = batch["X"], batch["Y"][:,0,:,:,:], batch["Y"][:,1,:,:,:], batch["Y"][:,2,:,:,:], batch["Y"][:,2,:,:,:]
                 Ypred1 = model(Xb)
