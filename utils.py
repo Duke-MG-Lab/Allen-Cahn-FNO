@@ -73,10 +73,10 @@ class DataModule():
 
         data_arrays = [np.load(os.path.join(self.data_dir,file)) for file in tqdm(data_files)]
 
-        if self.esize:
+        if self.resize:
             for i,array in tqdm(enumerate(data_arrays)):
                 data_arrays[i] = np.reshape(skimage.transform.resize(array,
-                    (len(array), self.esize[0], self.resize[1])),
+                    (len(array), self.resize[0], self.resize[1])),
                     (len(array), 1, self.resize[0], self.resize[1]))
 
         return data_files, data_arrays

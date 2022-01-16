@@ -7,6 +7,36 @@ import torch
 from utils import DataModule
 from fourier_neural_operator import Fourier_Net2D
 
+# Model params
+output_config = {
+    "results_root_dir": "./results",
+    "save_every": 10,
+    "logs_dir": "logs",
+    "name_experiment": None,
+}
+
+input_config = {
+    "skip_steps":6,
+    "max_data":None,
+    "data_dir":"./data/AC",
+    "gpus":-1,
+}
+
+model_config = {
+    "max_epochs": 100,
+    "early_stopping_patience": 10,
+    "early_stopping_min_delta": 1e-4,
+    "lr": 5*1e-4,
+    "normalization": False,
+    "n_blocks": 6,
+    "layers_per_block": 3,
+    "channels": 70,
+    "name_model": "fourier",
+    "skip_con_weight":0.1,
+    "modes_fourier": 16,
+    "width_fourier": 60,
+}
+
 def train(input_config, output_config, model_config):
 
     # Training constants
@@ -92,3 +122,7 @@ def train(input_config, output_config, model_config):
 
         validation_step_outputs = np.array(torch.mean(torch.Tensor(epoch_validation_loss), axis =0))
         print("epoch: ", epoch, "validation loss: ", validation_step_outputs[0])
+
+
+if __name__ == "__main__":
+    train(input_config, output_config, model_config)
