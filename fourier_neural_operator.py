@@ -36,7 +36,7 @@ class SpectralConv2d_fast(nn.Module):
     def forward(self, x):
         batchsize = x.shape[0]
         # Compute Fourier coeffcients up to factor of e^(- something constant)
-        x_ft = torch.rfft(x, 2, normalized=True, onesided=True)
+        x_ft = torch.fft.rfft2(x)
 
         # Multiply relevant Fourier modes
         out_ft = torch.zeros(batchsize, self.out_channels,  x.size(-2), x.size(-1)//2 + 1, dtype=torch.cfloat, device=x.device)
@@ -46,12 +46,12 @@ class SpectralConv2d_fast(nn.Module):
             self.compl_mul2d(x_ft[:, :, -self.modes1:, :self.modes2], self.weights2)
 
         # Return to physical space
-        x = torch.irfft(out_ft, 2, normalized=True, onesided=True, signal_sizes=(x.size(-2), x.size(-1)))
+        x = torch.fft.irfft2(out_ft, s=(x.size(-2), x.size(-1)))
         return x
 
 
 class Fourier_Net2D(nn.Module):
-    def __init__(self, modes1, modes2, width):
+    def __init__(self, modes1, modes2, width, input_channel = 3):
 
         super(Fourier_Net2D, self).__init__()
 
@@ -72,7 +72,11 @@ class Fourier_Net2D(nn.Module):
         self.modes2 = modes2
         self.width = width
         self.padding = 2 # pad the domain if input is non-periodic
-        self.fc0 = nn.Linear(12, self.width)
+        self.fc0 = nn.Linear(input_channel, self.width)
+        
+        self.n_steps_ahead = 0
+        # Error tolerance to advance to next step
+        self.tol_next_step = 0.015
 
         # input channel is 12: the solution of the previous 10 timesteps + 2 locations (u(t-10, x, y), ..., u(t-1, x, y),  x, y)
         self.conv0 = SpectralConv2d_fast(self.width, self.width, self.modes1, self.modes2)
@@ -92,6 +96,8 @@ class Fourier_Net2D(nn.Module):
         self.fc2 = nn.Linear(128, 1)
 
     def forward(self, x):
+
+        x = x.permute(0, 2, 3, 1)
         
         grid = self.get_grid(x.shape, x.device)
         x = torch.cat((x, grid), dim=-1)
@@ -123,6 +129,8 @@ class Fourier_Net2D(nn.Module):
         x = self.fc1(x)
         x = F.gelu(x)
         x = self.fc2(x)
+
+        x = x.permute(0, 3, 1, 2)
 
         return x
 
