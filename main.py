@@ -127,6 +127,11 @@ def train(input_config, output_config, model_config):
         validation_step_outputs = np.array(torch.mean(torch.Tensor(epoch_validation_loss), axis =0))
         print("epoch: ", epoch, "validation loss: ", validation_step_outputs[0])
 
+    torch.save({
+            'model': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'scheduler': scheduler.state_dict(),
+            }, "./models")
 
 if __name__ == "__main__":
     train(input_config, output_config, model_config)
