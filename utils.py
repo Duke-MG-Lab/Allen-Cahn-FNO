@@ -37,6 +37,7 @@ class DataModule():
 
         self.skip_steps = skip_steps
         self.store_steps_ahead = store_steps_ahead
+        self.test_ratio = test_ratio
 
         # Load all data
         self.names, self.data_arrays = self.load_data()
@@ -60,8 +61,8 @@ class DataModule():
         self.test_dataset = PairDataset(self.x_test, self.y_test)
         self.test_simulations = self.select_test_simulations(self.arrays_test)
 
-        self.train_dataloader = DataLoader(self.train_dataset, batch_size = self._batch_size, shuffle = True)
-        self.val_dataloader = DataLoader(self.test_dataset, batch_size = self._batch_size, shuffle = True)
+        self.train_dataloader = DataLoader(self.train_dataset, batch_size = self.batch_size, shuffle = True)
+        self.val_dataloader = DataLoader(self.test_dataset, batch_size = self.batch_size, shuffle = True)
 
 
     def load_data(self):
@@ -110,10 +111,10 @@ class DataModule():
 
     def select_test_simulations(self, arrays_test):
 
-        if len(arrays_test) < self._n_test_simulation:
+        if len(arrays_test) < self.n_test_simulations:
             n_test_simulation = len(arrays_test)
         else:
-            n_test_simulation = self.n_test_simulation
+            n_test_simulation = self.n_test_simulations
 
         test_simulations = [arrays_test[index][8:] for index in np.arange(0, n_test_simulation, 1)]
 
